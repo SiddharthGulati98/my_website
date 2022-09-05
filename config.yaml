@@ -1,6 +1,6 @@
-baseURL: http://example.org/
+baseURL: https://siddharth-gulati.netlify.app/
 languageCode: en-us
-title: Forty
+title: Siddharth Gulati
 theme: forty
 googleAnalytics: ''
 disqusShortname: ''
@@ -10,7 +10,7 @@ params:
     subtitle: |-
       A RESPONSIVE SITE TEMPLATE DESIGNED BY HTML5 UP
       AND RELEASED UNDER THE CREATIVE COMMONS.
-    title: Hi, my name is Forty
+    title: Hi, my name is Siddharth Gulati
   blog: {}
   contact:
     address:
@@ -21,11 +21,11 @@ params:
     buttonClear: Clear
     buttonSend: Send message
     email:
-      - email: example@domain.com
+      - email: sgulati.mam2023@london.edu
         title: Email
     enable: yes
     phone:
-      - phone: (000) 000-0000 x1234
+      - phone: +44 7778905776
         title: Phone
   custom_css: []
   custom_js: []
