@@ -35,3 +35,24 @@ pie(
   init.angle = -50, border = NA
 )
 ```
+
+
+
+
+
+
+
+
+```{r}
+library(gganimate)
+technology %>% 
+ggplot(aes(x=, y= ))+
+  geom_col()+
+  labs(title = 'Year: {frame_time}', 
+     x = '% renewables', 
+     y = 'CO2 per cap') +
+  transition_time(year) +
+  ease_aes('linear')
+
+
+```
