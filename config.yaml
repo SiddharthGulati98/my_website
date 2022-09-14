@@ -6,10 +6,9 @@ googleAnalytics: ''
 disqusShortname: ''
 params:
   banner:
-    buttonText: Get Started
+    buttonText: View My Profile
     subtitle: |-
-      A RESPONSIVE SITE TEMPLATE DESIGNED BY HTML5 UP
-      AND RELEASED UNDER THE CREATIVE COMMONS.
+      Currently pursuing Masters in Analytics and Management (MAM) at London Business School (LBS).
     title: Hi, my name is Siddharth Gulati
   blog: {}
   contact:
@@ -20,9 +19,8 @@ params:
         title: Address
     buttonClear: Clear
     buttonSend: Send message
-    email:                                  n                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          n 
-      - email: sgulati.mam2023@london.edu
-        title: Email
+    email:
+    - email: sgulati.mam2023@london.edu
     enable: yes
     phone:
       - phone: +44 7778905776
@@ -81,13 +79,13 @@ params:
   tiles:
     enable: yes
     showcase:
-      - image: pic01.jpg
-        subtitle: Ipsum Dolor Sit Amet
-        title: Aliquam
+      - image: photo1.jpeg
+        subtitle: Click to view my Resume
+        title: Resume
         url: blogs/aliquam
-      - image: pic02.jpg
-        subtitle: Feugiat Amet Tempus
-        title: Tempus
+      - image: photo2.jpeg
+        subtitle: Click to view some next level photos
+        title: My Photography
         url: blogs/tempus
       - image: pic03.jpg
         subtitle: Lorem Etiam Nullam
@@ -114,5 +112,5 @@ params:
       pellentesque lorem ipsum dolor. \n    Nullam et orci eu lorem consequat tincidunt.
       Vivamus et sagittis libero.\n    Mauris aliquet magna magna sed nunc rhoncus
       amet pharetra et feugiat tempus."
-    title: Massa libero
-    url: blogs
+    title: About Siddharth
+    url: blog
