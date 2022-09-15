@@ -6,10 +6,10 @@ googleAnalytics: ''
 disqusShortname: ''
 params:
   banner:
-    buttonText: View My Profile
+    buttonText: Get To Know Me!
     subtitle: |-
       Currently pursuing Masters in Analytics and Management (MAM) at London Business School (LBS).
-    title: Hi, my name is Siddharth Gulati
+    title: Hi, I'm Sid!
   blog: {}
   contact:
     address:
@@ -74,8 +74,8 @@ params:
       - name: Elements
         url: elements.html
     menu: Menu
-    subtitle: By HTML5 Up
-    title: Forty
+    subtitle: 
+    title: Siddharth Gulati
   tiles:
     enable: yes
     showcase:
