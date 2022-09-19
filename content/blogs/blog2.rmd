@@ -1,0 +1,127 @@
+---
+title: "Magna"
+date: "2017-10-31T22:26:09-05:00"
+description: Lorem Etiam Nullam
+draft: no
+image: pic09.jpg
+keywords: ''
+slug: magna
+categories:
+- ''
+- ''
+---
+
+```{r, setup, echo=FALSE}
+knitr::opts_chunk$set(
+  message = FALSE, 
+  warning = FALSE, 
+  tidy=FALSE,     # display code as typed
+  size="small")   # slightly smaller font for code
+options(digits = 3)
+
+# default figure size
+knitr::opts_chunk$set(
+  fig.width=6.75, 
+  fig.height=6.75,
+  fig.align = "center"
+)
+```
+
+```{r load-libraries, warning=FALSE, message=FALSE, echo=FALSE}
+library(tidyverse)  # Load ggplot2, dplyr, and all the other tidyverse packages
+library(mosaic)
+library(ggthemes)
+library(lubridate)
+library(here)
+library(skimr)
+library(janitor)
+library(vroom)
+library(tidyquant)
+library(dplyr)
+library(psych)
+library(ggrepel)
+library(patchwork)
+```
+
+# Rents in San Francsisco 2000-2018
+
+```{r}
+# download directly off tidytuesdaygithub repo
+
+rent <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-07-05/rent.csv')
+
+```
+
+What are the variable types? Do they all correspond to what they really are? Which variables have most missing values?
+
+This dataset has 2 different types of data sets - character and double. All the variables correspond to the respective data types. The character data type is used for all text based variables like city, country, etc and the double precision data type is used for numeric and date variables. 'descr' has the most missing value, 197542. 'adress' has the second most missing value, of 196888.
+
+
+```{r skim_data}
+skimr::skim(rent)
+spec(rent)
+unique(rent$city)
+```
+
+
+
+Make a plot that shows the top 20 cities in terms of % of classifieds between 2000-2018. You need to calculate the number of listings by city, and then convert that number to a %.
+
+```{r top_cities}
+rent %>%
+  count(city, sort=TRUE) %>% 
+  mutate(prop = n/sum(n)) %>% 
+  slice_max(n= 20, order_by= prop) %>% 
+  mutate(city = fct_reorder(city,prop)) %>% 
+  ggplot(aes(x= prop, y= city))+
+  geom_col()+
+  theme_minimal(base_size = 18)+
+  scale_x_continuous(labels = scales::percent)+labs (x = 'prop', y = 'city', caption = "Source: Kate(2018). Bay Area Craiglist Rental Housing Posts, 2000 - 2018")
+```
+
+Make a plot that shows the evolution of median prices in San Francisco for 0, 1, 2, and 3 bedrooms listings. 
+```{r}
+rent_sf<- rent %>%
+          filter(city =="san francisco", beds <= 3) %>%
+          group_by(year, beds) %>%
+          summarise(med_rn = median(price))
+ 
+ggplot(rent_sf, aes(x=year, y=med_rn, color= factor(beds)))+geom_line()+facet_grid(~beds)
+```
+```{r}
+filtered_beds_0_2018 <- rent %>% group_by(beds,year) %>% filter(city =='san francisco',beds == 0, year ==2018) 
+head(filtered_beds_0_2018)
+```
+
+
+
+Finally, make a plot that shows median rental prices for the top 2 cities in the Bay area. Your final graph should look like this
+```{r}
+top_twelve_data <- rent %>%
+  count(city) %>% #to count number of classifieds in each city
+  arrange(desc(n)) %>%
+  slice(1:12) 
+top_twelve_cities <- as.vector(top_twelve_data$city)
+top_twelve_cities
+
+rent %>%
+  filter(city %in% top_twelve_cities) %>%
+  group_by(year, city) %>%
+  summarize(median_price = median(price)) %>%
+ggplot(aes(year, median_price, color = factor(city))) +
+  geom_line() +
+  facet_wrap(vars(city)) +
+  labs(
+  title = "Rental prices for 1-bedroom flats in the Bay Area",
+  x = NULL,
+  y = NULL,
+  caption = "Source: Pennington. Kate (2018). Bay Area Craigslist Rental Housing Posts 2000-2018") +
+  theme(legend.position = "None")
+```
+
+
+
+The data set shows us that San Francisco has the maximum percentage listings, precisely 4x listings more than San Jose, the second highest listings city. This is valid since most listing are in the densely populated area of San Francisco rather than in the suburbs in the vicinity. Moreover, its vicinity to Silicon Valley makes it a hub for residences. 
+
+In San Francisco, the median prices see a major rise across all the types of bedroom (0-3 bedroom flats) across a 20 year period. The drop in rents from 2002 to 2006 was a result of the housing bubble that caused the demand to decrease and rent prices to plummet down. This bubble burst in 2008, post which we see a massive rise in rents (~90% rise in rent from 2010 to 2015). This similar trend was experienced across all the cities in the Bay Area, with a decline from 2002 to 2006, and a multifold rise in the years after that.
+

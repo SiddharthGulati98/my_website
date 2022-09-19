@@ -84,12 +84,12 @@ params:
         title: Resume
         url: blogs/aliquam
       - image: photo2.jpeg
-        subtitle: Click to view some next level photos
-        title: My Photography
+        subtitle: Click to view the data and results
+        title: IMDB Ratings Project
         url: blogs/idmb_ratings
       - image: pic03.jpg
-        subtitle: Lorem Etiam Nullam
-        title: Magna
+        subtitle: Click to view the data and results
+        title: Rents in San Francisco
         url: blogs/magna
       - image: pic04.jpg
         subtitle: Nisl Sed Aliquam
