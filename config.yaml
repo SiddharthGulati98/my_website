@@ -83,7 +83,7 @@ params:
         subtitle: Click to view my Resume
         title: Resume
         url: blogs/aliquam
-      - image: photo2.jpeg
+      - image: imdb.jpeg
         subtitle: Click to view the data and results
         title: IMDB Ratings Project
         url: blogs/idmb_ratings
