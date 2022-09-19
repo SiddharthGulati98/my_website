@@ -1,0 +1,146 @@
+---
+categories:
+- ""
+- ""
+date: "2017-10-31T22:26:13-05:00"
+description: 
+draft: false
+image: stock.jpeg
+keywords: ""
+slug: stock
+title: Stock Financial Analysis
+---
+
+```{r, setup, echo=FALSE}
+knitr::opts_chunk$set(
+  message = FALSE, 
+  warning = FALSE, 
+  tidy=FALSE,     # display code as typed
+  size="small")   # slightly smaller font for code
+options(digits = 3)
+
+# default figure size
+knitr::opts_chunk$set(
+  fig.width=6.75, 
+  fig.height=6.75,
+  fig.align = "center"
+)
+```
+
+```{r load-libraries, warning=FALSE, message=FALSE, echo=FALSE}
+library(tidyverse)  # Load ggplot2, dplyr, and all the other tidyverse packages
+library(mosaic)
+library(ggthemes)
+library(lubridate)
+library(here)
+library(skimr)
+library(janitor)
+library(vroom)
+library(tidyquant)
+library(dplyr)
+library(psych)
+library(ggrepel)
+library(patchwork)
+```
+
+
+# Returns of financial stocks
+
+```{r load_nyse_data, message=FALSE, warning=FALSE}
+nyse <- read_csv(here::here("data","nyse.csv"))
+```
+
+Based on this dataset, create a table and a bar plot that shows the number of companies per sector, in descending order
+
+```{r companies_per_sector}
+companies_per_sector <- nyse %>% 
+  group_by(sector) %>% 
+  summarise(n_companies = n()) %>% 
+  arrange(desc(n_companies))
+
+ggplot(data = companies_per_sector, mapping = aes(x = n_companies, y = fct_reorder(sector,n_companies))) + 
+  geom_col() + 
+  labs(title = "number of companies per sector", x = "number of companies", y = "sector")
+```
+
+Next, let's choose some stocks and their ticker symbols and download some data. You **MUST** choose 6 different stocks from the ones listed below; You should, however, add `SPY` which is the SP500 ETF (Exchange Traded Fund).
+
+```{r get_price_data, message=FALSE, warning=FALSE, cache=TRUE}
+
+myStocks <- c("AAPL","JPM","DIS","DPZ","ANF","TSLA","XOM","SPY" ) %>%
+  tq_get(get  = "stock.prices",
+         from = "2011-01-01",
+         to   = "2022-08-31") %>% group_by(symbol) 
+
+glimpse(myStocks) # examine the structure of the resulting data frame
+```
+
+Financial performance analysis depend on returns; If I buy a stock today for 100 and I sell it tomorrow for 101.75, my one-day return, assuming no transaction costs, is 1.75%. So given the adjusted closing prices, our first step is to calculate daily and monthly returns.
+
+```{r calculate_returns, message=FALSE, warning=FALSE, cache=TRUE}
+#calculate daily returns
+myStocks_returns_daily <- myStocks %>%
+  tq_transmute(select     = adjusted, 
+               mutate_fun = periodReturn, 
+               period     = "daily", 
+               type       = "log",
+               col_rename = "daily_returns",
+               cols = c(nested.col))  
+
+#calculate monthly  returns
+myStocks_returns_monthly <- myStocks %>%
+  tq_transmute(select     = adjusted, 
+               mutate_fun = periodReturn, 
+               period     = "monthly", 
+               type       = "arithmetic",
+               col_rename = "monthly_returns",
+               cols = c(nested.col)) 
+
+#calculate yearly returns
+myStocks_returns_annual <- myStocks %>%
+  group_by(symbol) %>%
+  tq_transmute(select     = adjusted, 
+               mutate_fun = periodReturn, 
+               period     = "yearly", 
+               type       = "arithmetic",
+               col_rename = "yearly_returns",
+               cols = c(nested.col))
+```
+
+Create a table where you summarise monthly returns for each of the stocks and `SPY`; min, max, median, mean, SD.
+
+```{r summarise_monthly_returns}
+
+summarise_monthly_returns <- myStocks_returns_monthly %>% 
+  summarize(min = min(monthly_returns), max = max(monthly_returns), median = median(monthly_returns), mean = mean(monthly_returns), sd = sd(monthly_returns))
+```
+
+Plot a density plot, using `geom_density()`, for each of the stocks
+
+```{r density_monthly_returns}
+ggplot(data = myStocks_returns_monthly,aes (x = monthly_returns)) +
+  geom_density() +
+  facet_wrap(~symbol) 
+```
+
+What can you infer from this plot? Which stock is the riskiest? The least risky?
+We can see from the plot that the monthly returns of these stocks follow a normal distribution.
+
+The spread of the density graph indicates the riskiness of the stock. The wider the spread, the higher the risk and vice versa. Visually, the riskiest stock is the BCS because it's more likely to earn negative monthly returns. The least risky stock is SPY.
+
+
+
+Finally, make a plot that shows the expected monthly return (mean) of a stock on the Y axis and the risk (standard deviation) in the X-axis. Please use `ggrepel::geom_text_repel()` to label each stock
+
+```{r risk_return_plot}
+ggplot(summarise_monthly_returns) + 
+  aes(x = sd, y = mean, label = symbol) +
+  geom_point(color = "red") +
+  ggrepel::geom_text_repel()
+
+
+```
+
+What can you infer from this plot? Are there any stocks which, while being riskier, do not have a higher expected return?
+
+We can tell that there is a positive correlation between expected monthly returns and riskiness of the stock. This indicates a trade-off between these two financial indicators. However, we do see an outlier here, which is the BCS. BCS exhibits the highest riskiness, yet has the lowest expected return.
