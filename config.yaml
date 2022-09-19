@@ -86,7 +86,7 @@ params:
       - image: photo2.jpeg
         subtitle: Click to view some next level photos
         title: My Photography
-        url: blogs/tempus
+        url: blogs/idmb_ratings
       - image: pic03.jpg
         subtitle: Lorem Etiam Nullam
         title: Magna
@@ -104,13 +104,18 @@ params:
         title: Etiam
         url: blogs/ipsum
   two:
-    buttonText: Get Started
     enable: yes
-    subtitle: "Nullam et orci eu lorem consequat tincidunt vivamus et sagittis libero.
-      \n    Mauris aliquet magna magna sed nunc rhoncus pharetra. \n    Pellentesque
-      condimentum sem. In efficitur ligula tate urna. Maecenas laoreet massa vel lacinia
-      pellentesque lorem ipsum dolor. \n    Nullam et orci eu lorem consequat tincidunt.
-      Vivamus et sagittis libero.\n    Mauris aliquet magna magna sed nunc rhoncus
-      amet pharetra et feugiat tempus."
+    subtitle: "Currently a student at LBS, I have worked as a Senior Data Analyst (Product + Growth) at Airtel X Labs. I am a highly motivated individual, capable of delivering effective and timely results. I have internship experience at organisations including Airtel, American Express and HCL Technologies Ltd. 
+
+Apart from this, I was recently selected as an International Delegate for the Harvard College Project for Asian and International Relations (HPAIR) Conference 2020, held at Harvard University. 
+
+Being an ambitious and result-driven person, I have clearly defined goals and never hesitate to escape my comfort zone to face new challenges. I possess good analytical, logical, inter-personal and communication skills, and have a keen interest in Analytics, Strategy and Product."
     title: About Siddharth
-    url: blog
+    
+    
+    
+    
+    
+    
+    
+    

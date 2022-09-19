@@ -1,0 +1,115 @@
+---
+title: "IMDB Differences between directors"
+date: "2021-09-30"
+description: IMDB ratings
+image: spices.jpeg
+keywords: ''
+slug: idmb_ratings
+categories:
+- ''
+- ''
+---
+
+```{r, setup, echo=FALSE}
+knitr::opts_chunk$set(
+  message = FALSE, 
+  warning = FALSE, 
+  tidy=FALSE,     # display code as typed
+  size="small")   # slightly smaller font for code
+options(digits = 3)
+
+# default figure size
+knitr::opts_chunk$set(
+  fig.width=6.75, 
+  fig.height=6.75,
+  fig.align = "center"
+)
+```
+
+```{r load-libraries, echo=FALSE}
+library(tidyverse)  # Load ggplot2, dplyr, and all the other tidyverse packages
+library(mosaic)
+library(ggthemes)
+library(GGally)
+library(readxl)
+library(here)
+library(skimr)
+library(janitor)
+library(broom)
+library(tidyquant)
+library(infer)
+library(openintro)
+```
+
+Using IMDB ratings data for Steven Spielberg and Tim Burton, we will determine whether their ratings are the same or not. 
+
+Null Hypothesis: IMDB mean rating is the same for SS and TB. difference in m =0
+
+Alternative hypothesis: difference in mean is not equal to 0.
+t-stat: difference between mean divided by standard error
+p-value
+
+```{r load-movies-data,fig.height=5, fig.width=8 }
+movies <- read_csv( "/Users/siddharth/Downloads/movies.csv")
+#glimpse(movies)
+
+movies_2 <- movies %>% 
+  group_by(director) %>% 
+  filter(director %in% c("Steven Spielberg","Tim Burton")) %>% 
+  summarise(rating,mean_rating = mean(rating), #find datapoints needed for t distribution.
+         sd_rating = sd(rating),
+         count=n(),
+         t_critical =qt(0.975,count-1),
+         se_rating = sd(rating)/sqrt(count),
+         margin_of_error = t_critical*se_rating, 
+         rating_low = mean_rating - margin_of_error, 
+         rating_high = mean_rating +margin_of_error,
+         highest_rating =max(rating),
+         lowest_rating = min(rating))
+
+#movies_mean<-count(movies, mean_rating) 
+#movies_mean
+movies_2
+
+  ggplot(movies_2, aes(x = mean_rating,y = director))+
+  geom_point() +
+  geom_errorbar(data = movies_2,aes(xmin = rating_low, xmax=rating_high,height=0.2), size = 1, height = 0.1)+
+  labs(x = "Mean IMDB Rating",title = "Do Spielburg and Burton have the same mean IMDB rating",subtitle="95% confidence interval overlap")+
+    geom_rect(aes(xmin=7.27, xmax= 7.33, ymin=0, ymax=3),
+            fill = "grey70",
+            alpha = 0.5)+
+    theme_minimal()#+
+   # geom_text(aes(x= mean_rating, label = labels), vjust=0, nudge_y =0.05,overlap=FALSE)
+  #geom_text(label=mean)
+  #theme_bw()
+
+```
+## Analysis
+
+```{r, fig.height=5, fig.width=8}
+t.test(rating~director, data = movies_2) #find t-stat, p-value
+
+#simulating a null world using infer()
+set.seed(1234)
+ratings_in_null_world <- movies_2 %>%
+  specify(rating~director) %>% # we want to look at ratings of directors
+  hypothesize(null = "independence") %>%  # hypothesize that the difference is 0
+  generate(reps=1000, type="permute") %>% # create a bunch of simulated samples
+  calculate(stat="diff in means", order = c("Steven Spielberg","Tim Burton")) # find difference in means of each sample. 
+
+#ratings_in_null_world visualize, with shaded p value
+ratings_in_null_world %>% visualize() +
+  shade_p_value(obs_stat = 0.64, direction = "two-sided")
+
+ # finding p-value of simulated distribution
+p_value <- ratings_in_null_world%>%
+  get_p_value(obs_stat = .64, direction = "two-sided")
+p_value
+
+```
+With a p-value of 1%<5%, we can reject the null hypothesis that Spielburg and Burton have the same mean rating.  
+You should use both the `t.test` command and the `infer` package to simulate from a null distribution, where you assume zero difference between the two.
+
+By using the infer package, we can simulate from a null distribution and compute p-values (with get_p_value()). As seen from above, the p-value from the null distribution gives 0.4%<1%<5%. Thus, we can  infer that the null hypothesis can be rejected.
+
+We can conclude that the difference in mean ratings for the two directors is unlikely to be zero. 
