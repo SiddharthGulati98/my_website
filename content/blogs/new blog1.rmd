@@ -1,0 +1,158 @@
+---
+title: "Sales Analysis During Holidays"
+date: "2021-09-30"
+description: IMDB ratings
+image: superbowl.jpeg
+keywords: ''
+slug: idmb_ratings_new_blog
+categories:
+- ''
+- ''
+---
+
+##Part 1
+```{r}
+#install required packages
+library(tidyverse)  # Load ggplot2, dplyr, and all the other tidyverse packages
+library(mosaic)
+library(ggthemes)
+library(GGally)
+library(readxl)
+library(here)
+library(skimr)
+library(janitor)
+library(broom)
+library(tidyquant)
+library(infer)
+library(openintro)
+library(lubridate)
+
+```
+
+
+
+```{r}
+#load the data
+details <- read_csv(here::here("data_new","details.csv"))
+sales <- read_csv(here::here("data_new","sales.csv"))
+stores <- read_csv(here::here("data_new","stores.csv"))
+```
+
+#data cleaning
+sales_cleaned <- sales %>%mutate(week = isoweek(Date)) %>% filter(IsHoliday ==TRUE)
+
+sales_cleaned_holiday <- sales_cleaned 
+
+unique(sales_cleaned_holiday$Date)
+```
+
+
+
+```
+
+#assign festival name to date
+Christmas_date <- c("31/12/2010", "30/12/2011")
+Super_Bowl<- c("12/02/2010","11/02/2011","10/02/2012")
+Labor_day <- c("10/09/2010","09/09/2011","07/09/2012")
+Thanksgiving <- c("26/11/2010", "25/11/2011")
+
+sales_cleaned_holiday$holiday <- 
+  ifelse(sales_cleaned_holiday$Date %in%c("31/12/2010", "30/12/2011"), "Christmas",
+  ifelse(sales_cleaned_holiday$Date %in% c("12/02/2010","11/02/2011","10/02/2012"), "Super_Bowl",
+  ifelse(sales_cleaned_holiday$Date %in% c("10/09/2010","09/09/2011","07/09/2012"), "Labor_day",
+  ifelse(sales_cleaned_holiday$Date %in% c("26/11/2010", "25/11/2011"), "Thanksgiving",
+                        "other"  ))))
+
+```
+
+
+1. which holiday generates the highest average weekly sales
+```{r}
+#Data Analysis
+sales_cleaned_holiday_grouped <- sales_cleaned_holiday %>%  
+  group_by(holiday) %>% 
+  mutate(AverageRevenue = mean(Weekly_Sales)) %>%
+  arrange(desc(AverageRevenue))
+```
+Thanksgiving have the highest average weekly sales,22362.
+
+2. How much more value is generated during the average week in holiday in a 
+compared to Labor Day?
+The average sales for labour day is 15994.75
+6367.25 more sales was generated on Thanksgiving than Labor Day
+
+```{r}
+#visualize the regression
+df <- data.frame(Holiday =c("Super Bowl","Labor Day", 'Thanksgiving', "Christmas"), AverageRevenue = c(16495, 15995, 22362, 14644))
+ggplot(data=df, aes(x = Holiday, y = AverageRevenue))+
+  geom_bar(stat= "identity",color = "blue", fill ="white")+
+  labs(title = "Average Revenue of Holidays")
+```
+
+
+##Part 2
+```{r}
+#Clean data to remove Thanksgiving
+sales_c <- Sales  
+
+sales_c$holiday <- ifelse(sales_c$Date %in% c("31/12/2010", "30/12/2011"), "Christmas",
+        ifelse(sales_c$Date %in% c("12/02/2010","11/02/2011","10/02/2012"), "Super_Bowl",
+        ifelse(sales_c$Date %in% c("10/09/2010","09/09/2011","07/09/2012"), "Labor_day",
+        ifelse(sales_c$Date %in% c("26/11/2010", "25/11/2011"), "Thanksgiving",
+                        "other"  ))))
+
+sales_c <- sales_c %>% 
+  filter(holiday != "Thanksgiving") %>% 
+  group_by(IsHoliday)
+
+```
+
+
+```{r}
+#Treating IsHoliday as binary variable to predict weekly sales
+#build a regression model
+model1<- lm(Weekly_Sales ~ IsHoliday, data=sales_c)
+summary(model1)
+```
+```{r}
+#run a t test to double check the result
+t.test(Weekly_Sales ~IsHoliday, data = sales_c)
+```
+
+The difference in weekly sales on holiday weeks compared to non-holiday weeks 
+is not statistically significant. The P value for IsHoliday is 0.26, greater than 0.05,
+which makes the binary variable not statistically significant. Therefore we cannot reject
+the null hypothesis that there is no dfference in weekly sales on holiday weeks compared to 
+non-holiday weeks 
+
+```{r}
+#visualize the regression
+ggplot(sales_c, aes(x=IsHoliday, y=Weekly_Sales))+geom_point()+theme_minimal()+    geom_smooth(method=lm)+labs(title = "Sales of Holidays/non-holidays")
+```
+
+#Regression Models
+
+```{r}
+##To Merge the datasets
+data_to_use <- details %>% 
+  left_join(sales_cleaned_holiday %>% select(Store, Dept, Date, Weekly_Sales, holiday), by = c("Store","Date"))
+
+data_to_use <- left_join(data_to_use, stores, by = "Store", all.x = TRUE) %>% na.omit(data_to_use$holiday)
+
+data_to_use[is.na(data_to_use)] = 0
+
+skimr::skim(data_to_use)
+```
+
+```{r}
+##Model where outcome is weekly sales and all explanatory variables used
+model1 <- lm(log(Weekly_Sales+0.01) ~ ., data = data_to_use)
+msummary(model1)
+str(data_to_use)
+```
+
+Are all predictors coded appropriately? 
+
+No, the predictors are not coded properly. We can see that certain types of variables are in fact categorical variables, whose values cannot be directly interpreted. As an example, the values for the variale "store" range from 1 to 45. However, the value itself is meaningless. These variables need to be coded as factor variables to be interpreted properly by R.
+
+Additionally, based on the t-stat for all the exploratory variables for the above model, we can exclude the mark_down columns. We are ignoring these columns in our next model. As the data is skewed right, it makes sense to normalize the outcome variable weekly sales to be log(Weekly Sales).

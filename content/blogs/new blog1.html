@@ -1,0 +1,96 @@
+
+
+<p>Using IMDB ratings data for Steven Spielberg and Tim Burton, we will determine whether their ratings are the same or not.</p>
+<p>Null Hypothesis: IMDB mean rating is the same for SS and TB. difference in m =0</p>
+<p>Alternative hypothesis: difference in mean is not equal to 0.
+t-stat: difference between mean divided by standard error
+p-value</p>
+<pre class="r"><code>movies &lt;- read_csv( &quot;/Users/siddharth/Downloads/movies.csv&quot;)
+#glimpse(movies)
+
+movies_2 &lt;- movies %&gt;% 
+  group_by(director) %&gt;% 
+  filter(director %in% c(&quot;Steven Spielberg&quot;,&quot;Tim Burton&quot;)) %&gt;% 
+  summarise(rating,mean_rating = mean(rating), #find datapoints needed for t distribution.
+         sd_rating = sd(rating),
+         count=n(),
+         t_critical =qt(0.975,count-1),
+         se_rating = sd(rating)/sqrt(count),
+         margin_of_error = t_critical*se_rating, 
+         rating_low = mean_rating - margin_of_error, 
+         rating_high = mean_rating +margin_of_error,
+         highest_rating =max(rating),
+         lowest_rating = min(rating))
+
+#movies_mean&lt;-count(movies, mean_rating) 
+#movies_mean
+movies_2</code></pre>
+<pre><code>## # A tibble: 39 × 12
+## # Groups:   director [2]
+##    director rating mean_…¹ sd_ra…² count t_cri…³ se_ra…⁴ margi…⁵ ratin…⁶ ratin…⁷
+##    &lt;chr&gt;     &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;
+##  1 Steven …    7.9    7.57   0.695    23    2.07   0.145   0.301    7.27    7.87
+##  2 Steven …    8.1    7.57   0.695    23    2.07   0.145   0.301    7.27    7.87
+##  3 Steven …    6.2    7.57   0.695    23    2.07   0.145   0.301    7.27    7.87
+##  4 Steven …    8      7.57   0.695    23    2.07   0.145   0.301    7.27    7.87
+##  5 Steven …    8.5    7.57   0.695    23    2.07   0.145   0.301    7.27    7.87
+##  6 Steven …    6.5    7.57   0.695    23    2.07   0.145   0.301    7.27    7.87
+##  7 Steven …    6.5    7.57   0.695    23    2.07   0.145   0.301    7.27    7.87
+##  8 Steven …    8.6    7.57   0.695    23    2.07   0.145   0.301    7.27    7.87
+##  9 Steven …    8.3    7.57   0.695    23    2.07   0.145   0.301    7.27    7.87
+## 10 Steven …    7.4    7.57   0.695    23    2.07   0.145   0.301    7.27    7.87
+## # … with 29 more rows, 2 more variables: highest_rating &lt;dbl&gt;,
+## #   lowest_rating &lt;dbl&gt;, and abbreviated variable names ¹​mean_rating,
+## #   ²​sd_rating, ³​t_critical, ⁴​se_rating, ⁵​margin_of_error, ⁶​rating_low,
+## #   ⁷​rating_high</code></pre>
+<pre class="r"><code>  ggplot(movies_2, aes(x = mean_rating,y = director))+
+  geom_point() +
+  geom_errorbar(data = movies_2,aes(xmin = rating_low, xmax=rating_high,height=0.2), size = 1, height = 0.1)+
+  labs(x = &quot;Mean IMDB Rating&quot;,title = &quot;Do Spielburg and Burton have the same mean IMDB rating&quot;,subtitle=&quot;95% confidence interval overlap&quot;)+
+    geom_rect(aes(xmin=7.27, xmax= 7.33, ymin=0, ymax=3),
+            fill = &quot;grey70&quot;,
+            alpha = 0.5)+
+    theme_minimal()#+</code></pre>
+<p><img src="/blogs/new%20blog1_files/figure-html/load-movies-data-1.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>   # geom_text(aes(x= mean_rating, label = labels), vjust=0, nudge_y =0.05,overlap=FALSE)
+  #geom_text(label=mean)
+  #theme_bw()</code></pre>
+<div id="analysis" class="section level2">
+<h2>Analysis</h2>
+<pre class="r"><code>t.test(rating~director, data = movies_2) #find t-stat, p-value</code></pre>
+<pre><code>## 
+##  Welch Two Sample t-test
+## 
+## data:  rating by director
+## t = 3, df = 31, p-value = 0.01
+## alternative hypothesis: true difference in means between group Steven Spielberg and group Tim Burton is not equal to 0
+## 95 percent confidence interval:
+##  0.16 1.13
+## sample estimates:
+## mean in group Steven Spielberg       mean in group Tim Burton 
+##                           7.57                           6.93</code></pre>
+<pre class="r"><code>#simulating a null world using infer()
+set.seed(1234)
+ratings_in_null_world &lt;- movies_2 %&gt;%
+  specify(rating~director) %&gt;% # we want to look at ratings of directors
+  hypothesize(null = &quot;independence&quot;) %&gt;%  # hypothesize that the difference is 0
+  generate(reps=1000, type=&quot;permute&quot;) %&gt;% # create a bunch of simulated samples
+  calculate(stat=&quot;diff in means&quot;, order = c(&quot;Steven Spielberg&quot;,&quot;Tim Burton&quot;)) # find difference in means of each sample. 
+
+#ratings_in_null_world visualize, with shaded p value
+ratings_in_null_world %&gt;% visualize() +
+  shade_p_value(obs_stat = 0.64, direction = &quot;two-sided&quot;)</code></pre>
+<p><img src="/blogs/new%20blog1_files/figure-html/unnamed-chunk-1-1.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code> # finding p-value of simulated distribution
+p_value &lt;- ratings_in_null_world%&gt;%
+  get_p_value(obs_stat = .64, direction = &quot;two-sided&quot;)
+p_value</code></pre>
+<pre><code>## # A tibble: 1 × 1
+##   p_value
+##     &lt;dbl&gt;
+## 1   0.004</code></pre>
+<p>With a p-value of 1%&lt;5%, we can reject the null hypothesis that Spielburg and Burton have the same mean rating.<br />
+You should use both the <code>t.test</code> command and the <code>infer</code> package to simulate from a null distribution, where you assume zero difference between the two.</p>
+<p>By using the infer package, we can simulate from a null distribution and compute p-values (with get_p_value()). As seen from above, the p-value from the null distribution gives 0.4%&lt;1%&lt;5%. Thus, we can infer that the null hypothesis can be rejected.</p>
+<p>We can conclude that the difference in mean ratings for the two directors is unlikely to be zero.</p>
+</div>

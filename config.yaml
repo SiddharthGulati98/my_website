@@ -95,14 +95,14 @@ params:
         subtitle: Click to view the data and results
         title: Stock Financial Analysis
         url: blogs/stock
-      - image: pic05.jpg
-        subtitle: Ipsum Dolor Sit Amet
-        title: Consequat
-        url: blogs/ipsum
-      - image: pic06.jpg
-        subtitle: Feugiat Amet Tempus
-        title: Etiam
-        url: blogs/ipsum
+      - image: superbowl.jpeg
+        subtitle: Click to view the data and results
+        title: Average Weekly Sales During Holidays
+        url: blogs/idmb_ratings_new_blog
+      - image: climate.jpeg
+        subtitle: Click to view the data and results
+        title: Climate Change & Temperature Analysis
+        url: blogs/climate
   two:
     enable: yes
     subtitle: "Currently a student at LBS, I have worked as a Senior Data Analyst (Product + Growth) at Airtel X Labs. I am a highly motivated individual, capable of delivering effective and timely results. I have internship experience at organisations including Airtel, American Express and HCL Technologies Ltd. 

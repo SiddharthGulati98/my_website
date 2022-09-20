@@ -1,0 +1,204 @@
+
+
+<div id="climate-change-and-temperature-anomalies" class="section level1">
+<h1>Climate change and temperature anomalies</h1>
+<p>We can find data on the <em>Combined Land-Surface Air and Sea-Surface Water Temperature Anomalies</em> in the
+Northern Hemisphere at <a href="https://data.giss.nasa.gov/gistemp">NASA’s Goddard Institute for Space
+Studies</a>. The <a href="https://data.giss.nasa.gov/gistemp/tabledata_v4/NH.Ts+dSST.txt">tabular data of
+temperature anomalies can be found
+here</a></p>
+<pre class="r"><code>weather &lt;- 
+  read_csv(&quot;https://data.giss.nasa.gov/gistemp/tabledata_v4/NH.Ts+dSST.csv&quot;, 
+           skip = 1, 
+           na = &quot;***&quot;)</code></pre>
+<pre class="r"><code>#inspecting data.frame &#39;weather&#39;
+
+#glimpse(weather) 
+
+# selecting the year and 12 month variables
+weather_clean &lt;- weather %&gt;% 
+  select(1:13) 
+
+# converting to the dataframe to longer format (tidyweather)
+tidyweather &lt;- pivot_longer(weather_clean, cols = 2:13, names_to = &quot;Month&quot;, values_to = &quot;delta&quot;)
+
+tidyweather</code></pre>
+<pre><code>## # A tibble: 1,716 × 3
+##     Year Month delta
+##    &lt;dbl&gt; &lt;chr&gt; &lt;dbl&gt;
+##  1  1880 Jan   -0.39
+##  2  1880 Feb   -0.53
+##  3  1880 Mar   -0.23
+##  4  1880 Apr   -0.3 
+##  5  1880 May   -0.05
+##  6  1880 Jun   -0.18
+##  7  1880 Jul   -0.21
+##  8  1880 Aug   -0.25
+##  9  1880 Sep   -0.24
+## 10  1880 Oct   -0.3 
+## # … with 1,706 more rows</code></pre>
+<div id="plotting-information" class="section level2">
+<h2>Plotting Information</h2>
+<p>We plot the data using a time-series scatter plot, and add a
+trendline. To do that, we first need to create a new variable called
+<code>date</code> in order to ensure that the <code>delta</code> values are plot
+chronologically.</p>
+<pre class="r"><code>tidyweather &lt;- tidyweather %&gt;%
+  mutate(date = ymd(paste(as.character(Year), Month, &quot;1&quot;)),
+         month = month(date, label=TRUE),
+         year = year(date))
+
+ggplot(tidyweather, aes(x=date, y = delta))+
+  geom_point()+
+  geom_smooth(color=&quot;red&quot;) +
+  theme_bw() +
+  labs (
+    title = &quot;Weather Anomalies&quot;
+  )</code></pre>
+<p><img src="/blogs/new%20blog2_files/figure-html/scatter_plot-1.png" width="648" style="display: block; margin: auto;" /></p>
+</div>
+<div id="is-the-effect-of-increasing-temperature-more-pronounced-in-some-months" class="section level2">
+<h2>Is the effect of increasing temperature more pronounced in some months?</h2>
+<p>Use <code>facet_wrap()</code> to produce a seperate scatter plot for each month,
+again with a smoothing line.</p>
+<pre class="r"><code>ggplot(tidyweather) +
+  aes(x = date, y = delta) +
+  geom_point () +
+  geom_smooth (color = &quot;red&quot;) +
+  theme_bw() +
+  labs (title = &quot;Weather Changes by Month&quot;) +
+  facet_wrap(~ month)</code></pre>
+<p><img src="/blogs/new%20blog2_files/figure-html/facet_wrap-1.png" width="648" style="display: block; margin: auto;" />
+- Delta on the y-axis, represents the temperature deviations from the
+expected value. The red smooth lines we drew are the trend lines for
+the temperature changes. The steeper the smooth lines are, the
+higher the rates of temperature increases.</p>
+<ul>
+<li><p>Before 1950, visually, we can see that for Januarys and Februaries,
+the effect of increasing temperature was more pronounced. For
+instance, the smooth line drawn for January is much steeper than
+that of July and August.</p></li>
+<li><p>We can tell that the year 1950 was roughly a point, after which, the
+smooth line becomes much steeper for all months compared to
+before 1950. There are months where the effect of increasing
+temperature was more pronounced, but these effects are not
+distinctive visually.</p></li>
+</ul>
+</div>
+<div id="removed-data-before-1880" class="section level2">
+<h2>Removed Data before 1880</h2>
+<p>It is sometimes useful to group data into different time periods to
+study historical data. For example, we often refer to decades such as
+1970s, 1980s, 1990s etc. to refer to a period of time. NASA calcuialtes
+a temperature anomaly, as difference form the base periof of 1951-1980.
+The code below creates a new data frame called <code>comparison</code> that groups
+data in five time periods: 1881-1920, 1921-1950, 1951-1980, 1981-2010
+and 2011-present.</p>
+<p>We remove data before 1800 and before using <code>filter</code>. Then, we use the
+<code>mutate</code> function to create a new variable <code>interval</code> which contains
+information on which period each observation belongs to. We can assign
+the different periods using <code>case_when()</code>.</p>
+<pre class="r"><code>comparison &lt;- tidyweather %&gt;% 
+  filter(Year&gt;= 1881) %&gt;%     #remove years prior to 1881
+  #create new variable &#39;interval&#39;, and assign values based on criteria below:
+  mutate(interval = case_when(
+    Year %in% c(1881:1920) ~ &quot;1881-1920&quot;,
+    Year %in% c(1921:1950) ~ &quot;1921-1950&quot;,
+    Year %in% c(1951:1980) ~ &quot;1951-1980&quot;,
+    Year %in% c(1981:2010) ~ &quot;1981-2010&quot;,
+    TRUE ~ &quot;2011-present&quot;
+  ))</code></pre>
+<p>Now that we have the <code>interval</code> variable, we can create a density plot
+to study the distribution of monthly deviations (<code>delta</code>), grouped by
+the different time periods we are interested in. Set <code>fill</code> to
+<code>interval</code> to group and colour the data by different time periods.</p>
+<pre class="r"><code>ggplot(comparison) +
+  aes(x = delta, fill = interval) +
+  geom_density(alpha = 0.3) +
+  theme_minimal(base_size = 18)</code></pre>
+<p><img src="/blogs/new%20blog2_files/figure-html/density_plot-1.png" width="648" style="display: block; margin: auto;" /></p>
+<p>So far, we have been working with monthly anomalies. However, we might
+be interested in average annual anomalies. We can do this by using
+<code>group_by()</code> and <code>summarise()</code>, followed by a scatter plot to display
+the result.</p>
+<pre class="r"><code>#creating yearly averages
+average_annual_anomaly &lt;- tidyweather %&gt;% 
+  group_by(Year) %&gt;%   #grouping data by Year
+  
+# creating summaries for mean delta 
+# use `na.rm=TRUE` to eliminate NA (not available) values 
+  summarise(mean_delta = mean(delta), na.rm = TRUE) 
+
+#plotting the data:
+ggplot(average_annual_anomaly) +
+  aes(x = Year, y = mean_delta) +
+  geom_point() +
+  
+  
+#Fit the best fit line, using LOESS method
+#change theme to theme_bw() to have white background + black frame around plot
+  aes(x = Year, y = mean_delta) +
+  geom_smooth(method = loess, color = &quot;red&quot;) +
+  theme_bw( base_size = 18) +
+  labs (title = &quot;Average Annual Anomolies Over Time&quot;, x = &quot;Year&quot;, y = &quot;Average Annual Temperature Change&quot;) </code></pre>
+<p><img src="/blogs/new%20blog2_files/figure-html/averaging-1.png" width="648" style="display: block; margin: auto;" /></p>
+</div>
+<div id="confidence-interval-for-delta" class="section level2">
+<h2>Confidence Interval for <code>delta</code></h2>
+<div id="using-the-formula" class="section level3">
+<h3>Using the formula</h3>
+<pre class="r"><code># choose the interval 2011-present
+# what dplyr verb will you use? 
+  formula_ci &lt;- comparison %&gt;% 
+  filter(interval == &quot;2011-present&quot;) %&gt;% 
+  
+# calculate summary statistics for temperature deviation (delta) 
+# calculate mean, SD, count, SE, lower/upper 95% CI
+# what dplyr verb will you use
+    summarise(mean = mean(delta, na.rm = TRUE),
+            count = n(),
+            SD = sd(delta, na.rm = TRUE),
+            SE = SD / sqrt(count),
+            # find t critical value with n-1 degrees of freedom
+            t_critical = qt(0.975,count -1),
+            margin_of_error = SE * t_critical,
+            lower_95pct_CI = mean - margin_of_error,
+            upper_95pct_CI = mean + margin_of_error)
+  
+# print out formula_CI
+formula_ci</code></pre>
+<pre><code>## # A tibble: 1 × 8
+##    mean count    SD     SE t_critical margin_of_error lower_95pct_CI upper_95p…¹
+##   &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt;  &lt;dbl&gt;      &lt;dbl&gt;           &lt;dbl&gt;          &lt;dbl&gt;       &lt;dbl&gt;
+## 1  1.07   144 0.265 0.0221       1.98          0.0437           1.02        1.11
+## # … with abbreviated variable name ¹​upper_95pct_CI</code></pre>
+</div>
+<div id="using-infer-package" class="section level3">
+<h3>Using Infer() package</h3>
+<pre class="r"><code># calculate ci using the infer package (bootstrap simulation)
+set.seed(1234)
+boot_ci &lt;- comparison %&gt;% 
+  # select the interval of interest
+  filter(interval == &quot;2011-present&quot;) %&gt;% 
+  # specify the variable of interest
+  specify (response = delta) %&gt;% 
+  # generate bootstrap samples 
+  generate (reps = 1000, type = &quot;bootstrap&quot;) %&gt;% 
+  # find mean
+  calculate(stat = &quot;mean&quot;) %&gt;% 
+  # find the ci
+  get_confidence_interval(level = 0.95, type = &quot;percentile&quot;)
+
+# print out boot_ci
+boot_ci</code></pre>
+<pre><code>## # A tibble: 1 × 2
+##   lower_ci upper_ci
+##      &lt;dbl&gt;    &lt;dbl&gt;
+## 1     1.02     1.11</code></pre>
+<ul>
+<li>We are 95% confident that the average temperature change in the 2011-present time period is between 1.02 and 1.11 degree-celcius.</li>
+<li>We get very similar results for confidence intervals from the bootstrap method as well as the formula method.</li>
+</ul>
+</div>
+</div>
+</div>
