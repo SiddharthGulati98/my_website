@@ -94,7 +94,7 @@ params:
       - image: stock.jpeg
         subtitle: Click to view the data and results
         title: Stock Financial Analysis
-        url: blogs/blog3.rmd
+        url: blogs/stock_analysis
       - image: superbowl.jpeg
         subtitle: Click to view the data and results
         title: Average Weekly Sales During Holidays
