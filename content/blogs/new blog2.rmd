@@ -4,7 +4,7 @@ date: "2021-09-30"
 description: IMDB ratings
 image: climate.jpeg
 keywords: ''
-slug: climate
+slug: climate_change
 categories:
 - ''
 - ''

@@ -92,7 +92,7 @@ params:
       - image: climate.jpeg
         subtitle: Click to view the data and results
         title: Climate Change & Temperature Analysis
-        url: blogs/climate
+        url: blogs/climate_change
   two:
     enable: yes
     subtitle: "Currently a student at LBS, I have worked as a Senior Data Analyst (Product + Growth) at Airtel X Labs. I am a highly motivated individual, capable of delivering effective and timely results. I have internship experience at organisations including Airtel, American Express and HCL Technologies Ltd. 
