@@ -47,7 +47,7 @@ library(patchwork)
 # Returns of financial stocks
 
 ```{r load_nyse_data, message=FALSE, warning=FALSE}
-nyse <- read_csv(here::here("data","nyse.csv"))
+nyse <- read_csv("/Users/siddharth/Downloads/nyse.csv")
 ```
 
 Based on this dataset, create a table and a bar plot that shows the number of companies per sector, in descending order
