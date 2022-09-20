@@ -33,9 +33,9 @@ library(lubridate)
 
 ```{r}
 #load the data
-details <- read_csv(here::here("data_new","details.csv"))
-sales <- read_csv(here::here("data_new","sales.csv"))
-stores <- read_csv(here::here("data_new","stores.csv"))
+details <- read_csv("/Users/siddharth/Downloads/am01/session10_workshop5/data/data/details.csv")
+sales <- read_csv("/Users/siddharth/Downloads/am01/session10_workshop5/data/data/sales.csv")
+stores <- read_csv("/Users/siddharth/Downloads/am01/session10_workshop5/data/data/stores.csv")
 ```
 
 #data cleaning
