@@ -94,7 +94,7 @@ params:
       - image: superbowl.jpeg
         subtitle: Click to view the data and results
         title: Average Weekly Sales During Holidays
-        url: blogs/idmb_ratings_new_blog
+        url: blogs/new_blog
       - image: climate.jpeg
         subtitle: Click to view the data and results
         title: Climate Change & Temperature Analysis

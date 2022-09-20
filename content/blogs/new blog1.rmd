@@ -1,7 +1,7 @@
 ---
 title: "Sales Analysis During Holidays"
 date: "2021-09-30"
-description: IMDB ratings
+description: Sales Analysis During Holidays
 image: superbowl.jpeg
 keywords: ''
 slug: new_blog
