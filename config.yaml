@@ -62,8 +62,8 @@ params:
       - name: Get Started
         url: blogs
     button2:
-      - name: Log In
-        url: '#'
+      - name: Download CV
+        url: '/Users/siddharth/Downloads/my_website/content/blogs/SiddharthGulati_Consulting_FINAL_13Sep.pdf'
     links:
       - name: Home
         url: '#'
