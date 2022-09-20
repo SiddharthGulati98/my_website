@@ -1,96 +1,649 @@
 
 
-<p>Using IMDB ratings data for Steven Spielberg and Tim Burton, we will determine whether their ratings are the same or not.</p>
-<p>Null Hypothesis: IMDB mean rating is the same for SS and TB. difference in m =0</p>
-<p>Alternative hypothesis: difference in mean is not equal to 0.
-t-stat: difference between mean divided by standard error
-p-value</p>
-<pre class="r"><code>movies &lt;- read_csv( &quot;/Users/siddharth/Downloads/movies.csv&quot;)
-#glimpse(movies)
+<p>##Part 1</p>
+<pre class="r"><code>#install required packages
+library(tidyverse)  # Load ggplot2, dplyr, and all the other tidyverse packages</code></pre>
+<pre><code>## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.2 ──
+## ✔ ggplot2 3.3.6     ✔ purrr   0.3.4
+## ✔ tibble  3.1.8     ✔ dplyr   1.0.9
+## ✔ tidyr   1.2.0     ✔ stringr 1.4.1
+## ✔ readr   2.1.2     ✔ forcats 0.5.2
+## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+## ✖ dplyr::filter() masks stats::filter()
+## ✖ dplyr::lag()    masks stats::lag()</code></pre>
+<pre class="r"><code>library(mosaic)</code></pre>
+<pre><code>## Registered S3 method overwritten by &#39;mosaic&#39;:
+##   method                           from   
+##   fortify.SpatialPolygonsDataFrame ggplot2
+## 
+## The &#39;mosaic&#39; package masks several functions from core packages in order to add 
+## additional features.  The original behavior of these functions should not be affected by this.
+## 
+## Attaching package: &#39;mosaic&#39;
+## 
+## The following object is masked from &#39;package:Matrix&#39;:
+## 
+##     mean
+## 
+## The following objects are masked from &#39;package:dplyr&#39;:
+## 
+##     count, do, tally
+## 
+## The following object is masked from &#39;package:purrr&#39;:
+## 
+##     cross
+## 
+## The following object is masked from &#39;package:ggplot2&#39;:
+## 
+##     stat
+## 
+## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     binom.test, cor, cor.test, cov, fivenum, IQR, median, prop.test,
+##     quantile, sd, t.test, var
+## 
+## The following objects are masked from &#39;package:base&#39;:
+## 
+##     max, mean, min, prod, range, sample, sum</code></pre>
+<pre class="r"><code>library(ggthemes)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;ggthemes&#39;
+## 
+## The following object is masked from &#39;package:mosaic&#39;:
+## 
+##     theme_map</code></pre>
+<pre class="r"><code>library(GGally)</code></pre>
+<pre><code>## Registered S3 method overwritten by &#39;GGally&#39;:
+##   method from   
+##   +.gg   ggplot2</code></pre>
+<pre class="r"><code>library(readxl)
+library(here)</code></pre>
+<pre><code>## here() starts at /Users/siddharth/Downloads/my_website</code></pre>
+<pre class="r"><code>library(skimr)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;skimr&#39;
+## 
+## The following object is masked from &#39;package:mosaic&#39;:
+## 
+##     n_missing</code></pre>
+<pre class="r"><code>library(janitor)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;janitor&#39;
+## 
+## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     chisq.test, fisher.test</code></pre>
+<pre class="r"><code>library(broom)
+library(tidyquant)</code></pre>
+<pre><code>## Loading required package: lubridate
+## 
+## Attaching package: &#39;lubridate&#39;
+## 
+## The following objects are masked from &#39;package:base&#39;:
+## 
+##     date, intersect, setdiff, union
+## 
+## Loading required package: PerformanceAnalytics
+## Loading required package: xts
+## Loading required package: zoo
+## 
+## Attaching package: &#39;zoo&#39;
+## 
+## The following objects are masked from &#39;package:base&#39;:
+## 
+##     as.Date, as.Date.numeric
+## 
+## 
+## Attaching package: &#39;xts&#39;
+## 
+## The following objects are masked from &#39;package:dplyr&#39;:
+## 
+##     first, last
+## 
+## 
+## Attaching package: &#39;PerformanceAnalytics&#39;
+## 
+## The following object is masked from &#39;package:graphics&#39;:
+## 
+##     legend
+## 
+## Loading required package: quantmod
+## Loading required package: TTR
+## Registered S3 method overwritten by &#39;quantmod&#39;:
+##   method            from
+##   as.zoo.data.frame zoo</code></pre>
+<pre class="r"><code>library(infer)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;infer&#39;
+## 
+## The following objects are masked from &#39;package:mosaic&#39;:
+## 
+##     prop_test, t_test</code></pre>
+<pre class="r"><code>library(openintro)</code></pre>
+<pre><code>## Loading required package: airports
+## Loading required package: cherryblossom
+## Loading required package: usdata
+## 
+## Attaching package: &#39;openintro&#39;
+## 
+## The following object is masked from &#39;package:mosaic&#39;:
+## 
+##     dotPlot
+## 
+## The following objects are masked from &#39;package:lattice&#39;:
+## 
+##     ethanol, lsegments</code></pre>
+<pre class="r"><code>library(lubridate)</code></pre>
+<pre class="r"><code>#load the data
+details &lt;- read_csv(&quot;/Users/siddharth/Downloads/am01/session10_workshop5/data/data/details.csv&quot;)</code></pre>
+<pre><code>## Rows: 8190 Columns: 12
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: &quot;,&quot;
+## chr  (1): Date
+## dbl (10): Store, Temperature, Fuel_Price, MarkDown1, MarkDown2, MarkDown3, M...
+## lgl  (1): IsHoliday
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre class="r"><code>sales &lt;- read_csv(&quot;/Users/siddharth/Downloads/am01/session10_workshop5/data/data/sales.csv&quot;)</code></pre>
+<pre><code>## Rows: 421570 Columns: 5
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: &quot;,&quot;
+## chr (1): Date
+## dbl (3): Store, Dept, Weekly_Sales
+## lgl (1): IsHoliday
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre class="r"><code>stores &lt;- read_csv(&quot;/Users/siddharth/Downloads/am01/session10_workshop5/data/data/stores.csv&quot;)</code></pre>
+<pre><code>## Rows: 45 Columns: 3
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: &quot;,&quot;
+## chr (1): Type
+## dbl (2): Store, Size
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<p>#data cleaning</p>
+<pre class="r"><code>sales_cleaned &lt;- sales %&gt;%mutate(week = isoweek(Date)) %&gt;% filter(IsHoliday ==TRUE)
 
-movies_2 &lt;- movies %&gt;% 
-  group_by(director) %&gt;% 
-  filter(director %in% c(&quot;Steven Spielberg&quot;,&quot;Tim Burton&quot;)) %&gt;% 
-  summarise(rating,mean_rating = mean(rating), #find datapoints needed for t distribution.
-         sd_rating = sd(rating),
-         count=n(),
-         t_critical =qt(0.975,count-1),
-         se_rating = sd(rating)/sqrt(count),
-         margin_of_error = t_critical*se_rating, 
-         rating_low = mean_rating - margin_of_error, 
-         rating_high = mean_rating +margin_of_error,
-         highest_rating =max(rating),
-         lowest_rating = min(rating))
+sales_cleaned_holiday &lt;- sales_cleaned 
 
-#movies_mean&lt;-count(movies, mean_rating) 
-#movies_mean
-movies_2</code></pre>
-<pre><code>## # A tibble: 39 × 12
-## # Groups:   director [2]
-##    director rating mean_…¹ sd_ra…² count t_cri…³ se_ra…⁴ margi…⁵ ratin…⁶ ratin…⁷
-##    &lt;chr&gt;     &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;
-##  1 Steven …    7.9    7.57   0.695    23    2.07   0.145   0.301    7.27    7.87
-##  2 Steven …    8.1    7.57   0.695    23    2.07   0.145   0.301    7.27    7.87
-##  3 Steven …    6.2    7.57   0.695    23    2.07   0.145   0.301    7.27    7.87
-##  4 Steven …    8      7.57   0.695    23    2.07   0.145   0.301    7.27    7.87
-##  5 Steven …    8.5    7.57   0.695    23    2.07   0.145   0.301    7.27    7.87
-##  6 Steven …    6.5    7.57   0.695    23    2.07   0.145   0.301    7.27    7.87
-##  7 Steven …    6.5    7.57   0.695    23    2.07   0.145   0.301    7.27    7.87
-##  8 Steven …    8.6    7.57   0.695    23    2.07   0.145   0.301    7.27    7.87
-##  9 Steven …    8.3    7.57   0.695    23    2.07   0.145   0.301    7.27    7.87
-## 10 Steven …    7.4    7.57   0.695    23    2.07   0.145   0.301    7.27    7.87
-## # … with 29 more rows, 2 more variables: highest_rating &lt;dbl&gt;,
-## #   lowest_rating &lt;dbl&gt;, and abbreviated variable names ¹​mean_rating,
-## #   ²​sd_rating, ³​t_critical, ⁴​se_rating, ⁵​margin_of_error, ⁶​rating_low,
-## #   ⁷​rating_high</code></pre>
-<pre class="r"><code>  ggplot(movies_2, aes(x = mean_rating,y = director))+
-  geom_point() +
-  geom_errorbar(data = movies_2,aes(xmin = rating_low, xmax=rating_high,height=0.2), size = 1, height = 0.1)+
-  labs(x = &quot;Mean IMDB Rating&quot;,title = &quot;Do Spielburg and Burton have the same mean IMDB rating&quot;,subtitle=&quot;95% confidence interval overlap&quot;)+
-    geom_rect(aes(xmin=7.27, xmax= 7.33, ymin=0, ymax=3),
-            fill = &quot;grey70&quot;,
-            alpha = 0.5)+
-    theme_minimal()#+</code></pre>
-<p><img src="/blogs/new%20blog1_files/figure-html/load-movies-data-1.png" width="768" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>   # geom_text(aes(x= mean_rating, label = labels), vjust=0, nudge_y =0.05,overlap=FALSE)
-  #geom_text(label=mean)
-  #theme_bw()</code></pre>
-<div id="analysis" class="section level2">
-<h2>Analysis</h2>
-<pre class="r"><code>t.test(rating~director, data = movies_2) #find t-stat, p-value</code></pre>
+unique(sales_cleaned_holiday$Date)</code></pre>
+<pre><code>##  [1] &quot;12/02/2010&quot; &quot;10/09/2010&quot; &quot;26/11/2010&quot; &quot;31/12/2010&quot; &quot;11/02/2011&quot;
+##  [6] &quot;09/09/2011&quot; &quot;25/11/2011&quot; &quot;30/12/2011&quot; &quot;10/02/2012&quot; &quot;07/09/2012&quot;</code></pre>
+<pre class="r"><code>#assign festival name to date
+Christmas_date &lt;- c(&quot;31/12/2010&quot;, &quot;30/12/2011&quot;)
+Super_Bowl&lt;- c(&quot;12/02/2010&quot;,&quot;11/02/2011&quot;,&quot;10/02/2012&quot;)
+Labor_day &lt;- c(&quot;10/09/2010&quot;,&quot;09/09/2011&quot;,&quot;07/09/2012&quot;)
+Thanksgiving &lt;- c(&quot;26/11/2010&quot;, &quot;25/11/2011&quot;)
+
+sales_cleaned_holiday$holiday &lt;- 
+  ifelse(sales_cleaned_holiday$Date %in%c(&quot;31/12/2010&quot;, &quot;30/12/2011&quot;), &quot;Christmas&quot;,
+  ifelse(sales_cleaned_holiday$Date %in% c(&quot;12/02/2010&quot;,&quot;11/02/2011&quot;,&quot;10/02/2012&quot;), &quot;Super_Bowl&quot;,
+  ifelse(sales_cleaned_holiday$Date %in% c(&quot;10/09/2010&quot;,&quot;09/09/2011&quot;,&quot;07/09/2012&quot;), &quot;Labor_day&quot;,
+  ifelse(sales_cleaned_holiday$Date %in% c(&quot;26/11/2010&quot;, &quot;25/11/2011&quot;), &quot;Thanksgiving&quot;,
+                        &quot;other&quot;  ))))</code></pre>
+<ol style="list-style-type: decimal">
+<li>which holiday generates the highest average weekly sales</li>
+</ol>
+<pre class="r"><code>#Data Analysis
+sales_cleaned_holiday_grouped &lt;- sales_cleaned_holiday %&gt;%  
+  group_by(holiday) %&gt;% 
+  mutate(AverageRevenue = mean(Weekly_Sales)) %&gt;%
+  arrange(desc(AverageRevenue))</code></pre>
+<p>Thanksgiving have the highest average weekly sales,22362.</p>
+<ol start="2" style="list-style-type: decimal">
+<li>How much more value is generated during the average week in holiday in a
+compared to Labor Day?
+The average sales for labour day is 15994.75
+6367.25 more sales was generated on Thanksgiving than Labor Day</li>
+</ol>
+<pre class="r"><code>#visualize the regression
+df &lt;- data.frame(Holiday =c(&quot;Super Bowl&quot;,&quot;Labor Day&quot;, &#39;Thanksgiving&#39;, &quot;Christmas&quot;), AverageRevenue = c(16495, 15995, 22362, 14644))
+ggplot(data=df, aes(x = Holiday, y = AverageRevenue))+
+  geom_bar(stat= &quot;identity&quot;,color = &quot;blue&quot;, fill =&quot;white&quot;)+
+  labs(title = &quot;Average Revenue of Holidays&quot;)</code></pre>
+<p><img src="/blogs/new%20blog1_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p>##Part 2</p>
+<pre class="r"><code>#Clean data to remove Thanksgiving
+sales_c &lt;- sales  
+sales_c$holiday &lt;- ifelse(sales_c$Date %in% c(&quot;31/12/2010&quot;, &quot;30/12/2011&quot;), &quot;Christmas&quot;,
+        ifelse(sales_c$Date %in% c(&quot;12/02/2010&quot;,&quot;11/02/2011&quot;,&quot;10/02/2012&quot;), &quot;Super_Bowl&quot;,
+        ifelse(sales_c$Date %in% c(&quot;10/09/2010&quot;,&quot;09/09/2011&quot;,&quot;07/09/2012&quot;), &quot;Labor_day&quot;,
+        ifelse(sales_c$Date %in% c(&quot;26/11/2010&quot;, &quot;25/11/2011&quot;), &quot;Thanksgiving&quot;,
+                        &quot;other&quot;  ))))
+sales_c &lt;- sales_c %&gt;% 
+  filter(holiday != &quot;Thanksgiving&quot;) %&gt;% 
+  group_by(IsHoliday)</code></pre>
+<pre class="r"><code>#Treating IsHoliday as binary variable to predict weekly sales
+#build a regression model
+model1&lt;- lm(Weekly_Sales ~ IsHoliday, data=sales_c)
+summary(model1)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = Weekly_Sales ~ IsHoliday, data = sales_c)
+## 
+## Residuals:
+##    Min     1Q Median     3Q    Max 
+## -21003 -13913  -8359   4256 396329 
+## 
+## Coefficients:
+##               Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)   16012.41      35.92 445.835   &lt;2e-16 ***
+## IsHolidayTRUE  -168.61     150.40  -1.121    0.262    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 22480 on 415609 degrees of freedom
+## Multiple R-squared:  3.024e-06,  Adjusted R-squared:  6.183e-07 
+## F-statistic: 1.257 on 1 and 415609 DF,  p-value: 0.2622</code></pre>
+<pre class="r"><code>#run a t test to double check the result
+t.test(Weekly_Sales ~IsHoliday, data = sales_c)</code></pre>
 <pre><code>## 
 ##  Welch Two Sample t-test
 ## 
-## data:  rating by director
-## t = 3, df = 31, p-value = 0.01
-## alternative hypothesis: true difference in means between group Steven Spielberg and group Tim Burton is not equal to 0
+## data:  Weekly_Sales by IsHoliday
+## t = 1.1283, df = 26693, p-value = 0.2592
+## alternative hypothesis: true difference in means between group FALSE and group TRUE is not equal to 0
 ## 95 percent confidence interval:
-##  0.16 1.13
+##  -124.2865  461.5160
 ## sample estimates:
-## mean in group Steven Spielberg       mean in group Tim Burton 
-##                           7.57                           6.93</code></pre>
-<pre class="r"><code>#simulating a null world using infer()
-set.seed(1234)
-ratings_in_null_world &lt;- movies_2 %&gt;%
-  specify(rating~director) %&gt;% # we want to look at ratings of directors
-  hypothesize(null = &quot;independence&quot;) %&gt;%  # hypothesize that the difference is 0
-  generate(reps=1000, type=&quot;permute&quot;) %&gt;% # create a bunch of simulated samples
-  calculate(stat=&quot;diff in means&quot;, order = c(&quot;Steven Spielberg&quot;,&quot;Tim Burton&quot;)) # find difference in means of each sample. 
+## mean in group FALSE  mean in group TRUE 
+##            16012.41            15843.80</code></pre>
+<p>The difference in weekly sales on holiday weeks compared to non-holiday weeks
+is not statistically significant. The P value for IsHoliday is 0.26, greater than 0.05,
+which makes the binary variable not statistically significant. Therefore we cannot reject
+the null hypothesis that there is no dfference in weekly sales on holiday weeks compared to
+non-holiday weeks</p>
+<pre class="r"><code>#visualize the regression
+ggplot(sales_c, aes(x=IsHoliday, y=Weekly_Sales))+geom_point()+theme_minimal()+    geom_smooth(method=lm)+labs(title = &quot;Sales of Holidays/non-holidays&quot;)</code></pre>
+<pre><code>## `geom_smooth()` using formula &#39;y ~ x&#39;</code></pre>
+<p><img src="/blogs/new%20blog1_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p>#Regression Models</p>
+<pre class="r"><code>##To Merge the datasets
+data_to_use &lt;- details %&gt;% 
+  left_join(sales_cleaned_holiday %&gt;% select(Store, Dept, Date, Weekly_Sales, holiday), by = c(&quot;Store&quot;,&quot;Date&quot;))
 
-#ratings_in_null_world visualize, with shaded p value
-ratings_in_null_world %&gt;% visualize() +
-  shade_p_value(obs_stat = 0.64, direction = &quot;two-sided&quot;)</code></pre>
-<p><img src="/blogs/new%20blog1_files/figure-html/unnamed-chunk-1-1.png" width="768" style="display: block; margin: auto;" /></p>
-<pre class="r"><code> # finding p-value of simulated distribution
-p_value &lt;- ratings_in_null_world%&gt;%
-  get_p_value(obs_stat = .64, direction = &quot;two-sided&quot;)
-p_value</code></pre>
-<pre><code>## # A tibble: 1 × 1
-##   p_value
-##     &lt;dbl&gt;
-## 1   0.004</code></pre>
-<p>With a p-value of 1%&lt;5%, we can reject the null hypothesis that Spielburg and Burton have the same mean rating.<br />
-You should use both the <code>t.test</code> command and the <code>infer</code> package to simulate from a null distribution, where you assume zero difference between the two.</p>
-<p>By using the infer package, we can simulate from a null distribution and compute p-values (with get_p_value()). As seen from above, the p-value from the null distribution gives 0.4%&lt;1%&lt;5%. Thus, we can infer that the null hypothesis can be rejected.</p>
-<p>We can conclude that the difference in mean ratings for the two directors is unlikely to be zero.</p>
-</div>
+data_to_use &lt;- left_join(data_to_use, stores, by = &quot;Store&quot;, all.x = TRUE) %&gt;% na.omit(data_to_use$holiday)
+
+data_to_use[is.na(data_to_use)] = 0
+
+skimr::skim(data_to_use)</code></pre>
+<table>
+<caption><span id="tab:unnamed-chunk-11">Table 1: </span>Data summary</caption>
+<tbody>
+<tr class="odd">
+<td align="left">Name</td>
+<td align="left">data_to_use</td>
+</tr>
+<tr class="even">
+<td align="left">Number of rows</td>
+<td align="left">9992</td>
+</tr>
+<tr class="odd">
+<td align="left">Number of columns</td>
+<td align="left">17</td>
+</tr>
+<tr class="even">
+<td align="left">_______________________</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Column type frequency:</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">character</td>
+<td align="left">3</td>
+</tr>
+<tr class="odd">
+<td align="left">logical</td>
+<td align="left">1</td>
+</tr>
+<tr class="even">
+<td align="left">numeric</td>
+<td align="left">13</td>
+</tr>
+<tr class="odd">
+<td align="left">________________________</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">Group variables</td>
+<td align="left">None</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: character</strong></p>
+<table>
+<colgroup>
+<col width="19%" />
+<col width="13%" />
+<col width="19%" />
+<col width="5%" />
+<col width="5%" />
+<col width="8%" />
+<col width="12%" />
+<col width="15%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">skim_variable</th>
+<th align="right">n_missing</th>
+<th align="right">complete_rate</th>
+<th align="right">min</th>
+<th align="right">max</th>
+<th align="right">empty</th>
+<th align="right">n_unique</th>
+<th align="right">whitespace</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Date</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">10</td>
+<td align="right">10</td>
+<td align="right">0</td>
+<td align="right">4</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">holiday</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">9</td>
+<td align="right">12</td>
+<td align="right">0</td>
+<td align="right">4</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">Type</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">3</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: logical</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">skim_variable</th>
+<th align="right">n_missing</th>
+<th align="right">complete_rate</th>
+<th align="right">mean</th>
+<th align="left">count</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">IsHoliday</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="left">TRU: 9992</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: numeric</strong></p>
+<table>
+<colgroup>
+<col width="12%" />
+<col width="8%" />
+<col width="12%" />
+<col width="8%" />
+<col width="8%" />
+<col width="8%" />
+<col width="8%" />
+<col width="8%" />
+<col width="8%" />
+<col width="8%" />
+<col width="5%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">skim_variable</th>
+<th align="right">n_missing</th>
+<th align="right">complete_rate</th>
+<th align="right">mean</th>
+<th align="right">sd</th>
+<th align="right">p0</th>
+<th align="right">p25</th>
+<th align="right">p50</th>
+<th align="right">p75</th>
+<th align="right">p100</th>
+<th align="left">hist</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Store</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">20.05</td>
+<td align="right">12.01</td>
+<td align="right">1.00</td>
+<td align="right">10.00</td>
+<td align="right">19.00</td>
+<td align="right">29.00</td>
+<td align="right">45.00</td>
+<td align="left">▇▇▇▅▃</td>
+</tr>
+<tr class="even">
+<td align="left">Temperature</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">49.08</td>
+<td align="right">18.91</td>
+<td align="right">15.56</td>
+<td align="right">35.23</td>
+<td align="right">45.99</td>
+<td align="right">61.58</td>
+<td align="right">88.52</td>
+<td align="left">▂▇▆▃▃</td>
+</tr>
+<tr class="odd">
+<td align="left">Fuel_Price</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">3.51</td>
+<td align="right">0.27</td>
+<td align="right">3.10</td>
+<td align="right">3.24</td>
+<td align="right">3.44</td>
+<td align="right">3.71</td>
+<td align="right">4.12</td>
+<td align="left">▇▇▆▅▂</td>
+</tr>
+<tr class="even">
+<td align="left">MarkDown1</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">7120.19</td>
+<td align="right">6340.84</td>
+<td align="right">32.50</td>
+<td align="right">2026.82</td>
+<td align="right">5858.94</td>
+<td align="right">11024.45</td>
+<td align="right">36778.65</td>
+<td align="left">▇▃▂▁▁</td>
+</tr>
+<tr class="odd">
+<td align="left">MarkDown2</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">13958.22</td>
+<td align="right">23783.10</td>
+<td align="right">-9.98</td>
+<td align="right">56.16</td>
+<td align="right">1595.17</td>
+<td align="right">14356.07</td>
+<td align="right">104519.54</td>
+<td align="left">▇▁▁▁▁</td>
+</tr>
+<tr class="even">
+<td align="left">MarkDown3</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">15543.43</td>
+<td align="right">30792.02</td>
+<td align="right">0.45</td>
+<td align="right">46.18</td>
+<td align="right">124.32</td>
+<td align="right">399.77</td>
+<td align="right">141630.61</td>
+<td align="left">▇▁▁▁▁</td>
+</tr>
+<tr class="odd">
+<td align="left">MarkDown4</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">3661.55</td>
+<td align="right">5274.02</td>
+<td align="right">3.00</td>
+<td align="right">146.33</td>
+<td align="right">1177.09</td>
+<td align="right">4740.66</td>
+<td align="right">29483.81</td>
+<td align="left">▇▁▁▁▁</td>
+</tr>
+<tr class="even">
+<td align="left">MarkDown5</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">3839.41</td>
+<td align="right">2652.31</td>
+<td align="right">170.64</td>
+<td align="right">1787.07</td>
+<td align="right">3187.05</td>
+<td align="right">5723.00</td>
+<td align="right">11100.55</td>
+<td align="left">▇▆▃▃▁</td>
+</tr>
+<tr class="odd">
+<td align="left">CPI</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">174.55</td>
+<td align="right">39.73</td>
+<td align="right">129.84</td>
+<td align="right">136.48</td>
+<td align="right">189.06</td>
+<td align="right">218.47</td>
+<td align="right">226.21</td>
+<td align="left">▇▁▁▃▆</td>
+</tr>
+<tr class="even">
+<td align="left">Unemployment</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">7.53</td>
+<td align="right">1.75</td>
+<td align="right">4.08</td>
+<td align="right">6.43</td>
+<td align="right">7.44</td>
+<td align="right">8.45</td>
+<td align="right">12.89</td>
+<td align="left">▂▇▇▁▁</td>
+</tr>
+<tr class="odd">
+<td align="left">Dept</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">44.46</td>
+<td align="right">30.22</td>
+<td align="right">1.00</td>
+<td align="right">19.00</td>
+<td align="right">37.00</td>
+<td align="right">72.00</td>
+<td align="right">99.00</td>
+<td align="left">▇▇▅▃▆</td>
+</tr>
+<tr class="even">
+<td align="left">Weekly_Sales</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">19042.59</td>
+<td align="right">29394.32</td>
+<td align="right">-816.10</td>
+<td align="right">2738.10</td>
+<td align="right">9091.37</td>
+<td align="right">23692.84</td>
+<td align="right">633667.77</td>
+<td align="left">▇▁▁▁▁</td>
+</tr>
+<tr class="odd">
+<td align="left">Size</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">151562.77</td>
+<td align="right">53380.15</td>
+<td align="right">34875.00</td>
+<td align="right">118221.00</td>
+<td align="right">155078.00</td>
+<td align="right">203742.00</td>
+<td align="right">219622.00</td>
+<td align="left">▂▁▅▂▇</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>##Model where outcome is weekly sales and all explanatory variables used
+model1 &lt;- lm(log(Weekly_Sales+0.01) ~ ., data = data_to_use)</code></pre>
+<pre><code>## Warning in log(Weekly_Sales + 0.01): NaNs produced</code></pre>
+<pre class="r"><code>msummary(model1)</code></pre>
+<pre><code>##                  Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)     7.110e+00  5.403e-01  13.160  &lt; 2e-16 ***
+## Store          -6.260e-03  1.731e-03  -3.617 0.000299 ***
+## Date10/02/2012  1.241e-01  1.246e-01   0.996 0.319354    
+## Date25/11/2011  2.581e-01  1.574e-01   1.639 0.101198    
+## Date30/12/2011 -4.149e-02  1.467e-01  -0.283 0.777361    
+## Temperature     8.908e-05  2.370e-03   0.038 0.970016    
+## Fuel_Price      1.511e-01  1.299e-01   1.164 0.244561    
+## MarkDown1       1.336e-05  5.312e-06   2.515 0.011930 *  
+## MarkDown2       6.327e-06  1.562e-06   4.050 5.16e-05 ***
+## MarkDown3       4.920e-06  1.600e-06   3.075 0.002114 ** 
+## MarkDown4      -1.267e-05  7.564e-06  -1.674 0.094102 .  
+## MarkDown5       3.067e-05  1.163e-05   2.638 0.008348 ** 
+## CPI            -5.183e-04  6.525e-04  -0.794 0.427058    
+## Unemployment   -2.456e-02  1.240e-02  -1.981 0.047566 *  
+## Dept           -4.332e-03  5.882e-04  -7.365 1.91e-13 ***
+## TypeB           1.902e-01  7.511e-02   2.532 0.011342 *  
+## TypeC          -1.938e-01  1.896e-01  -1.022 0.306862    
+## Size            8.350e-06  8.290e-07  10.072  &lt; 2e-16 ***
+## 
+## Residual standard error: 1.774 on 9939 degrees of freedom
+##   (35 observations deleted due to missingness)
+## Multiple R-squared:  0.08251,    Adjusted R-squared:  0.08094 
+## F-statistic: 52.58 on 17 and 9939 DF,  p-value: &lt; 2.2e-16</code></pre>
+<pre class="r"><code>str(data_to_use)</code></pre>
+<pre><code>## tibble [9,992 × 17] (S3: tbl_df/tbl/data.frame)
+##  $ Store       : num [1:9992] 1 1 1 1 1 1 1 1 1 1 ...
+##  $ Date        : chr [1:9992] &quot;25/11/2011&quot; &quot;25/11/2011&quot; &quot;25/11/2011&quot; &quot;25/11/2011&quot; ...
+##  $ Temperature : num [1:9992] 60.1 60.1 60.1 60.1 60.1 ...
+##  $ Fuel_Price  : num [1:9992] 3.24 3.24 3.24 3.24 3.24 ...
+##  $ MarkDown1   : num [1:9992] 410 410 410 410 410 ...
+##  $ MarkDown2   : num [1:9992] 98 98 98 98 98 98 98 98 98 98 ...
+##  $ MarkDown3   : num [1:9992] 55806 55806 55806 55806 55806 ...
+##  $ MarkDown4   : num [1:9992] 8 8 8 8 8 8 8 8 8 8 ...
+##  $ MarkDown5   : num [1:9992] 555 555 555 555 555 ...
+##  $ CPI         : num [1:9992] 218 218 218 218 218 ...
+##  $ Unemployment: num [1:9992] 7.87 7.87 7.87 7.87 7.87 ...
+##  $ IsHoliday   : logi [1:9992] TRUE TRUE TRUE TRUE TRUE TRUE ...
+##  $ Dept        : num [1:9992] 1 2 3 4 5 6 7 8 9 10 ...
+##  $ Weekly_Sales: num [1:9992] 20533 45138 9242 46271 80565 ...
+##  $ holiday     : chr [1:9992] &quot;Thanksgiving&quot; &quot;Thanksgiving&quot; &quot;Thanksgiving&quot; &quot;Thanksgiving&quot; ...
+##  $ Type        : chr [1:9992] &quot;A&quot; &quot;A&quot; &quot;A&quot; &quot;A&quot; ...
+##  $ Size        : num [1:9992] 151315 151315 151315 151315 151315 ...
+##  - attr(*, &quot;na.action&quot;)= &#39;omit&#39; Named int [1:27409] 1 2 3 4 5 6 7 8 9 10 ...
+##   ..- attr(*, &quot;names&quot;)= chr [1:27409] &quot;1&quot; &quot;2&quot; &quot;3&quot; &quot;4&quot; ...</code></pre>
+<p>Are all predictors coded appropriately?</p>
+<p>No, the predictors are not coded properly. We can see that certain types of variables are in fact categorical variables, whose values cannot be directly interpreted. As an example, the values for the variale “store” range from 1 to 45. However, the value itself is meaningless. These variables need to be coded as factor variables to be interpreted properly by R.</p>
+<p>Additionally, based on the t-stat for all the exploratory variables for the above model, we can exclude the mark_down columns. We are ignoring these columns in our next model. As the data is skewed right, it makes sense to normalize the outcome variable weekly sales to be log(Weekly Sales).</p>

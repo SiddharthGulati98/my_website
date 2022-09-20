@@ -39,6 +39,7 @@ stores <- read_csv("/Users/siddharth/Downloads/am01/session10_workshop5/data/dat
 ```
 
 #data cleaning
+```{r}
 sales_cleaned <- sales %>%mutate(week = isoweek(Date)) %>% filter(IsHoliday ==TRUE)
 
 sales_cleaned_holiday <- sales_cleaned 
@@ -48,7 +49,7 @@ unique(sales_cleaned_holiday$Date)
 
 
 
-```
+```{r}
 
 #assign festival name to date
 Christmas_date <- c("31/12/2010", "30/12/2011")
@@ -93,14 +94,12 @@ ggplot(data=df, aes(x = Holiday, y = AverageRevenue))+
 ##Part 2
 ```{r}
 #Clean data to remove Thanksgiving
-sales_c <- Sales  
-
+sales_c <- sales  
 sales_c$holiday <- ifelse(sales_c$Date %in% c("31/12/2010", "30/12/2011"), "Christmas",
         ifelse(sales_c$Date %in% c("12/02/2010","11/02/2011","10/02/2012"), "Super_Bowl",
         ifelse(sales_c$Date %in% c("10/09/2010","09/09/2011","07/09/2012"), "Labor_day",
         ifelse(sales_c$Date %in% c("26/11/2010", "25/11/2011"), "Thanksgiving",
                         "other"  ))))
-
 sales_c <- sales_c %>% 
   filter(holiday != "Thanksgiving") %>% 
   group_by(IsHoliday)
