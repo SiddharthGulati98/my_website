@@ -63,7 +63,7 @@ params:
         url: blogs
     button2:
       - name: Download CV
-        url: '/Users/siddharth/Downloads/my_website/content/blogs/SiddharthGulati_Consulting_FINAL_13Sep.pdf'
+        url: blogs/CV.pdf
     links:
       - name: Home
         url: '#'
