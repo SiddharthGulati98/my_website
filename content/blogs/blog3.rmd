@@ -7,7 +7,7 @@ description:
 draft: false
 image: stock.jpeg
 keywords: ""
-slug: stock
+slug: stock_analysis
 title: Stock Financial Analysis
 ---
 
